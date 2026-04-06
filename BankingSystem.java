@@ -70,33 +70,52 @@ public class BankingSystem {
         }
     }
 
-    static void createAccount(Scanner sc) throws Exception {
-        System.out.print("Enter CID (1-20): ");
-        int cid = sc.nextInt();
+static void createAccount(Scanner sc) throws Exception {
+    System.out.print("Enter CID (1-20): ");
+    int cid = sc.nextInt();
 
-        if (cid < 1 || cid > 20)
-            throw new InvalidCIDException("CID must be between 1 and 20");
+    if (cid < 1 || cid > 20)
+        throw new InvalidCIDException("CID must be between 1 and 20");
 
-        System.out.print("Enter Name: ");
-        String cname = sc.next();
+    File file = new File(FILE_NAME);
 
-        System.out.print("Enter Amount: ");
-        double amount = sc.nextDouble();
+    if (file.exists()) {
+        Scanner fileScanner = new Scanner(file);
 
-        if (amount < 0)
-            throw new InvalidAmountException("Amount must be positive");
+        while (fileScanner.hasNextLine()) {
+            String line = fileScanner.nextLine();
+            String[] data = line.split(" ");
 
-        if (amount < 1000)
-            throw new InvalidAmountException("Minimum balance is Rs. 1000");
+            int existingCID = Integer.parseInt(data[0]);
 
-        Customer c = new Customer(cid, cname, amount);
-
-        FileWriter fw = new FileWriter(FILE_NAME, true);
-        fw.write(c.toString() + "\n");
-        fw.close();
-
-        System.out.println("Account Created Successfully!");
+            if (existingCID == cid) {
+                fileScanner.close();
+                throw new Exception("Customer already exists!");
+            }
+        }
+        fileScanner.close();
     }
+
+    System.out.print("Enter Name: ");
+    String cname = sc.next();
+
+    System.out.print("Enter Amount: ");
+    double amount = sc.nextDouble();
+
+    if (amount < 0)
+        throw new InvalidAmountException("Amount must be positive");
+
+    if (amount < 1000)
+        throw new InvalidAmountException("Minimum balance is Rs. 1000");
+
+    Customer c = new Customer(cid, cname, amount);
+
+    FileWriter fw = new FileWriter(FILE_NAME, true);
+    fw.write(c.toString() + "\n");
+    fw.close();
+
+    System.out.println("Account Created Successfully!");
+}
 
     static void withdraw(Scanner sc) throws Exception {
         System.out.print("Enter CID: ");
